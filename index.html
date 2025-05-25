@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ClosetSense - Outfit Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Outfit', sans-serif; margin: 0; padding: 0; }
+    body { background: #fdfbff; color: #333; padding: 20px; }
+    header { background: #a685e2; color: white; padding: 30px; text-align: center; border-radius: 20px; }
+    header h1 { font-size: 2.5rem; }
+    main { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    section { margin-bottom: 30px; }
+    h2 { color: #7d5fff; margin-bottom: 10px; }
+    label { display: block; margin-top: 15px; font-weight: 600; }
+    select, input[type="file"], input[type="text"] {
+      width: 100%; margin-top: 5px; padding: 10px; border-radius: 10px;
+      border: 1px solid #ccc; background: #f9f9f9; font-size: 1rem;
+    }
+    .button {
+      background: #7d5fff; color: white; padding: 12px 20px; border: none;
+      border-radius: 25px; font-size: 1rem; cursor: pointer; margin-top: 20px;
+    }
+    .button:hover { background: #6b4df7; }
+    .preview-container { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
+    .image-box {
+      position: relative;
+    }
+    .image-box img {
+      width: 120px; height: 140px; object-fit: cover; border-radius: 12px;
+      border: 2px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .remove-btn {
+      position: absolute;
+      top: 5px; right: 5px;
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #resultado {
+      background: #f2f0ff; padding: 20px; border-radius: 12px; margin-top: 20px;
+      border-left: 5px solid #7d5fff; white-space: pre-line;
+    }
+    #login-screen { max-width: 400px; margin: 80px auto; text-align: center; }
+
+    /* Ajuste para las imágenes del outfit sugerido */
+    #outfit-preview img {
+      width: 80px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #7d5fff;
+      margin-right: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Pantalla de inicio de sesión -->
+  <div id="login-screen">
+    <h2>Bienvenido a ClosetSense</h2>
+    <p>Ingresa tu nombre para comenzar:</p>
+    <input type="text" id="nombreUsuario" placeholder="Tu nombre">
+    <button class="button" onclick="iniciarSesion()">Entrar</button>
+  </div>
+
+  <!-- Contenido principal de la app -->
+  <div id="app" style="display: none;">
+    <header>
+      <h1>ClosetSense</h1>
+      <p id="saludo"></p>
+    </header>
+
+    <main>
+      <section>
+        <h2>1. Selecciona tus preferencias</h2>
+        <label>Clima de hoy:</label>
+        <select id="clima">
+          <option>Caluroso</option>
+          <option>Frío</option>
+          <option>Lluvioso</option>
+          <option>Nublado</option>
+        </select>
+
+        <label>Estilo preferido:</label>
+        <select id="estilo">
+          <option>Casual</option>
+          <option>Formal</option>
+          <option>Deportivo</option>
+          <option>Elegante</option>
+        </select>
+      </section>
+
+      <section>
+        <h2>2. Sube tus prendas</h2>
+
+        <div>
+          <label>Blusas:</label>
+          <input type="file" id="blusa" accept="image/*" multiple onchange="handleImageUpload(event, 'blusas')">
+          <div class="preview-container" id="preview-blusas"></div>
+        </div>
+
+        <div>
+          <label>Sudaderas:</label>
+          <input type="file" id="sudadera" accept="image/*" multiple onchange="handleImageUpload(event, 'sudaderas')">
+          <div class="preview-container" id="preview-sudaderas"></div>
+        </div>
+
+        <div>
+          <label>Pantalones:</label>
+          <input type="file" id="pantalon" accept="image/*" multiple onchange="handleImageUpload(event, 'pantalones')">
+          <div class="preview-container" id="preview-pantalones"></div>
+        </div>
+
+        <div>
+          <label>Calzado:</label>
+          <input type="file" id="calzado" accept="image/*" multiple onchange="handleImageUpload(event, 'calzados')">
+          <div class="preview-container" id="preview-calzados"></div>
+        </div>
+      </section>
+
+      <button class="button" onclick="sugerirOutfit()">Sugerir Outfit</button>
+
+      <div class="preview-container" id="outfit-preview"></div>
+      <div id="resultado"></div>
+    </main>
+  </div>
+
+  <script>
+    let prendas = {
+      blusas: [],
+      sudaderas: [],
+      pantalones: [],
+      calzados: []
+    };
+
+    function iniciarSesion() {
+      const nombre = document.getElementById("nombreUsuario").value.trim();
+      if (nombre) {
+        localStorage.setItem("nombreUsuario", nombre);
+        location.reload();
+      }
+    }
+
+    window.onload = function () {
+      const nombre = localStorage.getItem("nombreUsuario");
+      if (nombre) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("saludo").innerText = "Hola, " + nombre + " 👋";
+      }
+    };
+
+    function handleImageUpload(event, tipo) {
+      const files = Array.from(event.target.files);
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        prendas[tipo].push(url);
+      });
+      renderPreviews(tipo);
+    }
+
+    function renderPreviews(tipo) {
+      const container = document.getElementById(`preview-${tipo}`);
+      container.innerHTML = "";
+      prendas[tipo].forEach((url, index) => {
+        const div = document.createElement("div");
+        div.className = "image-box";
+        div.innerHTML = `
+          <img src="${url}" alt="${tipo}">
+          <button class="remove-btn" onclick="removeImage('${tipo}', ${index})">×</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function removeImage(tipo, index) {
+      prendas[tipo].splice(index, 1);
+      renderPreviews(tipo);
+    }
+
+    function sugerirOutfit() {
+      const clima = document.getElementById('clima').value;
+      const estilo = document.getElementById('estilo').value;
+
+      localStorage.setItem("clima", clima);
+      localStorage.setItem("estilo", estilo);
+
+      const resultado = document.getElementById('resultado');
+      const preview = document.getElementById('outfit-preview');
+      resultado.innerHTML = '';
+      preview.innerHTML = '';
+
+      const getRandom = (array) => array.length ? array[Math.floor(Math.random() * array.length)] : null;
+
+      const blusa = getRandom(prendas.blusas);
+      const sudadera = getRandom(prendas.sudaderas);
+      const pantalon = getRandom(prendas.pantalones);
+      const calzado = getRandom(prendas.calzados);
+
+      if (blusa) preview.innerHTML += `<img src="${blusa}" alt="Blusa">`;
+      if ((clima === 'Frío' || clima === 'Lluvioso' || clima === 'Nublado') && sudadera)
+        preview.innerHTML += `<img src="${sudadera}" alt="Sudadera">`;
+      if (pantalon) preview.innerHTML += `<img src="${pantalon}" alt="Pantalón">`;
+      if (calzado) preview.innerHTML += `<img src="${calzado}" alt="Calzado">`;
+
+      // Simulación de inteligencia
+      let score = 0;
+      let mensaje = "🤖 ClosetSense opina:\n";
+
+      if ((clima === "Frío" || clima === "Lluvioso" || clima === "Nublado") && sudadera) {
+        mensaje += "✔️ Bien hecho, llevas sudadera para el clima fresco.\n";
+        score++;
+      } else if ((clima === "Frío" || clima === "Lluvioso") && !sudadera) {
+        mensaje += "🧥 Falta una sudadera para el clima frío o lluvioso.\n";
+        score--;
+      }
+
+      if (clima === "Caluroso" && sudadera) {
+        mensaje += "⚠️ Evita usar sudadera si hace calor.\n";
+        score--;
+      }
+
+      if (blusa && pantalon && calzado) score++;
+
+      // Resultado final
+      if (score >= 2) {
+        mensaje += "\n✅ Este outfit está bien combinado y es adecuado.";
+      } else if (score === 1) {
+        mensaje += "\n🤔 Aceptable, pero puede mejorar según el clima.";
+      } else {
+        mensaje += "\n❌ No recomendado. Revisa si es adecuado al clima y estilo.";
+      }
+
+      resultado.innerText = mensaje;
+    }
+  </script>
+
+</body>
+</html>
