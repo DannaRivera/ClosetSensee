@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closet Sense - Tu estilo sin esfuerzo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Closet Sense</h1>
+        <p>Tu armario sabe lo que necesitas</p>
+    </header>
+
+    <section id="problema">
+        <h2>¿Qué problema resolvemos?</h2>
+        <p>Muchas personas pierden tiempo cada mañana decidiendo qué ponerse. Nuestra aplicación te ayuda a seleccionar tu ropa de forma rápida y personalizada, sin necesidad de pensarlo tú mismo.</p>
+    </section>
+
+    <section id="como-funciona">
+        <h2>¿Cómo funciona?</h2>
+        <p>Descarga la app y crea tu perfil de estilo. Luego, escanea tu clóset o sube fotos de tus prendas. Closet Sense clasifica tu ropa y genera un clóset digital organizado.</p>
+        <p>La app se conecta con el clima y tu calendario para sugerirte outfits adecuados para cada ocasión.</p>
+    </section>
+
+    <section id="publico-objetivo">
+        <h2>¿A quién está dirigida?</h2>
+        <p>Closet Sense está diseñada para jóvenes entre 18 y 35 años con vidas activas que valoran su imagen, pero tienen poco tiempo para elegir su ropa.</p>
+    </section>
+
+    <footer>
+        <p>© 2025 Closet Sense | Diseñado con pasión por Melany, Danna y Adan</p>
+    </footer>
+</body>
+</html>
